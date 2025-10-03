@@ -14,7 +14,7 @@ import {
   Typography,
   IconButton,
 } from "@mui/material";
-import { Check, Edit, Delete } from "@mui/icons-material";
+import { Check, Edit, Delete, Logout } from "@mui/icons-material";
 
 export default function TodoList() {
   const [tasks, setTasks] = useState([]);
@@ -22,7 +22,6 @@ export default function TodoList() {
   const [dateStart, setDateStart] = useState("");
   const [editId, setEditId] = useState(null);
 
-  // โหลดข้อมูลจาก backend ตอน mount
   useEffect(() => {
     reloadTasks();
   }, []);
@@ -44,12 +43,16 @@ export default function TodoList() {
       .then((data) => setTasks(data));
   };
 
-  // เพิ่มหรือแก้ไข Task
+  // ✅ Logout function
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // ลบ token
+    window.location.href = "/login"; // กลับไปหน้า login
+  };
+
   const handleAddTask = () => {
     if (!name || !dateStart) return alert("กรุณากรอกข้อมูลให้ครบ");
 
     if (editId !== null) {
-      // ✅ อัปเดตงาน (ชื่อ + วันที่)
       fetch(`http://localhost:3001/tasks/${editId}`, {
         method: "PUT",
         headers: {
@@ -66,7 +69,6 @@ export default function TodoList() {
           reloadTasks();
         });
     } else {
-      // ✅ เพิ่มงานใหม่
       fetch("http://localhost:3001/tasks", {
         method: "POST",
         headers: {
@@ -84,7 +86,6 @@ export default function TodoList() {
     }
   };
 
-  // ลบ Task2
   const handleDelete = (id) => {
     fetch(`http://localhost:3001/tasks/${id}`, {
       method: "DELETE",
@@ -94,7 +95,6 @@ export default function TodoList() {
     }).then(() => reloadTasks());
   };
 
-  // Toggle finished
   const handleToggleFinished = (id, finished) => {
     fetch(`http://localhost:3001/tasks/${id}/finished`, {
       method: "PUT",
@@ -106,7 +106,6 @@ export default function TodoList() {
     }).then(() => reloadTasks());
   };
 
-  // กดปุ่ม Edit
   const handleEdit = (task) => {
     setName(task.name);
     setDateStart(task.date_start);
@@ -116,9 +115,18 @@ export default function TodoList() {
   return (
     <Container maxWidth="md" sx={{ mt: 6 }}>
       <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          📋 Todo List
-        </Typography>
+        {/* Header + Logout */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+          <Typography variant="h4">📋 Todo List</Typography>
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<Logout />}
+            onClick={handleLogout}
+          >
+            Logout
+          </Button>
+        </Box>
 
         {/* Input Form */}
         <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
@@ -144,7 +152,7 @@ export default function TodoList() {
             {editId ? "Update" : "Add"}
           </Button>
         </Box>
-{/* test*/}
+
         {/* Table */}
         <TableContainer component={Paper}>
           <Table>
@@ -172,7 +180,6 @@ export default function TodoList() {
                       backgroundColor: task.finished ? "#e8f5e9" : "inherit",
                     }}
                   >
-                    {/* ใช้ index + 1 เป็น row_number */}
                     <TableCell>{index + 1}</TableCell>
                     <TableCell
                       sx={{
@@ -220,7 +227,6 @@ export default function TodoList() {
                   </TableRow>
                 ))
               )}
-              
             </TableBody>
           </Table>
         </TableContainer>
