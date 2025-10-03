@@ -13,6 +13,9 @@ app.use(bodyParser.json());
 app.use("/auth", authRoutes);
 app.use("/tasks", taskRoutes);
 
-app.listen(3001, () => {
-  console.log("✅ Server running on https://todolist-backend.up.railway.app");
+// ใช้ PORT จาก Railway หรือ fallback เป็น 3001 เวลา dev
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
