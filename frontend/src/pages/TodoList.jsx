@@ -1,0 +1,230 @@
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Button,
+  Container,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  IconButton,
+} from "@mui/material";
+import { Check, Edit, Delete } from "@mui/icons-material";
+
+export default function TodoList() {
+  const [tasks, setTasks] = useState([]);
+  const [name, setName] = useState("");
+  const [dateStart, setDateStart] = useState("");
+  const [editId, setEditId] = useState(null);
+
+  // โหลดข้อมูลจาก backend ตอน mount
+  useEffect(() => {
+    reloadTasks();
+  }, []);
+
+  const reloadTasks = () => {
+    fetch("http://localhost:3001/tasks", {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    })
+      .then((res) => {
+        if (res.status === 401) {
+          alert("Session expired, please login again");
+          window.location.href = "/login";
+          return;
+        }
+        return res.json();
+      })
+      .then((data) => setTasks(data));
+  };
+
+  // เพิ่มหรือแก้ไข Task
+  const handleAddTask = () => {
+    if (!name || !dateStart) return alert("กรุณากรอกข้อมูลให้ครบ");
+
+    if (editId !== null) {
+      // ✅ อัปเดตงาน (ชื่อ + วันที่)
+      fetch(`http://localhost:3001/tasks/${editId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+        body: JSON.stringify({ name, date_start: dateStart }),
+      })
+        .then((res) => res.json())
+        .then(() => {
+          setEditId(null);
+          setName("");
+          setDateStart("");
+          reloadTasks();
+        });
+    } else {
+      // ✅ เพิ่มงานใหม่
+      fetch("http://localhost:3001/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+        body: JSON.stringify({ name, date_start: dateStart }),
+      })
+        .then((res) => res.json())
+        .then(() => {
+          setName("");
+          setDateStart("");
+          reloadTasks();
+        });
+    }
+  };
+
+  // ลบ Task2
+  const handleDelete = (id) => {
+    fetch(`http://localhost:3001/tasks/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    }).then(() => reloadTasks());
+  };
+
+  // Toggle finished
+  const handleToggleFinished = (id, finished) => {
+    fetch(`http://localhost:3001/tasks/${id}/finished`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: JSON.stringify({ finished: !finished }),
+    }).then(() => reloadTasks());
+  };
+
+  // กดปุ่ม Edit
+  const handleEdit = (task) => {
+    setName(task.name);
+    setDateStart(task.date_start);
+    setEditId(task.id);
+  };
+
+  return (
+    <Container maxWidth="md" sx={{ mt: 6 }}>
+      <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
+        <Typography variant="h4" gutterBottom>
+          📋 Todo List
+        </Typography>
+
+        {/* Input Form */}
+        <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+          <TextField
+            label="ชื่องาน"
+            variant="outlined"
+            fullWidth
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <TextField
+            label="วันที่เริ่ม"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={dateStart}
+            onChange={(e) => setDateStart(e.target.value)}
+          />
+          <Button
+            variant="contained"
+            color={editId ? "warning" : "primary"}
+            onClick={handleAddTask}
+          >
+            {editId ? "Update" : "Add"}
+          </Button>
+        </Box>
+{/* test*/}
+        {/* Table */}
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>ชื่อ</TableCell>
+                <TableCell>วันที่เริ่ม</TableCell>
+                <TableCell>สถานะ</TableCell>
+                <TableCell align="center">การจัดการ</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {tasks.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    ยังไม่มีงานในรายการ
+                  </TableCell>
+                </TableRow>
+              ) : (
+                tasks.map((task, index) => (
+                  <TableRow
+                    key={task.id}
+                    sx={{
+                      backgroundColor: task.finished ? "#e8f5e9" : "inherit",
+                    }}
+                  >
+                    {/* ใช้ index + 1 เป็น row_number */}
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell
+                      sx={{
+                        textDecoration: task.finished ? "line-through" : "none",
+                        color: task.finished ? "gray" : "inherit",
+                      }}
+                    >
+                      {task.name}
+                    </TableCell>
+                    <TableCell>
+                      {task.date_start
+                        ? new Intl.DateTimeFormat("th-TH", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            timeZone: "Asia/Bangkok",
+                          }).format(new Date(task.date_start))
+                        : ""}
+                    </TableCell>
+                    <TableCell>
+                      {task.finished ? "✅ เสร็จแล้ว" : "❌ ยังไม่เสร็จ"}
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton
+                        color="success"
+                        onClick={() =>
+                          handleToggleFinished(task.id, task.finished)
+                        }
+                      >
+                        <Check />
+                      </IconButton>
+                      <IconButton
+                        color="warning"
+                        onClick={() => handleEdit(task)}
+                      >
+                        <Edit />
+                      </IconButton>
+                      <IconButton
+                        color="error"
+                        onClick={() => handleDelete(task.id)}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+              
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </Container>
+  );
+}
