@@ -7,7 +7,7 @@ export default function LoginPage({ onLogin }) {
   const [message, setMessage] = useState("");
 
   const handleLogin = () => {
-    fetch("http://localhost:3001/auth/login", {
+    fetch("https://todolist-backend.up.railway.app/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password })

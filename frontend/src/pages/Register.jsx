@@ -7,7 +7,7 @@ export default function RegisterPage() {
   const [message, setMessage] = useState("");
 
   const handleRegister = () => {
-    fetch("http://localhost:3001/auth/register", {
+    fetch("https://todolist-backend.up.railway.app/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password })

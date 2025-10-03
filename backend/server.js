@@ -14,5 +14,5 @@ app.use("/auth", authRoutes);
 app.use("/tasks", taskRoutes);
 
 app.listen(3001, () => {
-  console.log("✅ Server running on http://localhost:3001");
+  console.log("✅ Server running on https://todolist-backend.up.railway.app");
 });
