@@ -7,19 +7,18 @@ const taskRoutes = require("./routes/tasks");
 
 const app = express();
 
+// ✅ แก้ตรงนี้
 app.use(
   cors({
-    origin: "*",
+    origin: "*", // หรือระบุเฉพาะโดเมนก็ได้ เช่น "https://todolist-project.vercel.app"
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    preflightContinue: false,
-    optionsSuccessStatus: 200,
   })
 );
 
-// app.options("*", cors());
-
 app.use(bodyParser.json());
+
+// Routes
 app.use("/auth", authRoutes);
 app.use("/tasks", taskRoutes);
 
