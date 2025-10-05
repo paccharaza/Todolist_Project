@@ -27,7 +27,7 @@ export default function TodoList() {
   }, []);
 
   const reloadTasks = () => {
-    fetch("https://todolist-backend.up.railway.app/tasks", {
+    fetch("https://superimproved-unmechanically-farrah.ngrok-free.dev/tasks", {
       headers: {
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
@@ -53,7 +53,7 @@ export default function TodoList() {
     if (!name || !dateStart) return alert("กรุณากรอกข้อมูลให้ครบ");
 
     if (editId !== null) {
-      fetch(`https://todolist-backend.up.railway.app/tasks/${editId}`, {
+      fetch(`https://superimproved-unmechanically-farrah.ngrok-free.dev/tasks/${editId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -69,7 +69,7 @@ export default function TodoList() {
           reloadTasks();
         });
     } else {
-      fetch("https://todolist-backend.up.railway.app/tasks", {
+      fetch("https://superimproved-unmechanically-farrah.ngrok-free.dev/tasks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export default function TodoList() {
   };
 
   const handleDelete = (id) => {
-    fetch(`https://todolist-backend.up.railway.app/tasks/${id}`, {
+    fetch(`https://superimproved-unmechanically-farrah.ngrok-free.dev/tasks/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: "Bearer " + localStorage.getItem("token"),
@@ -96,7 +96,7 @@ export default function TodoList() {
   };
 
   const handleToggleFinished = (id, finished) => {
-    fetch(`https://todolist-backend.up.railway.app/tasks/${id}/finished`, {
+    fetch(`https://superimproved-unmechanically-farrah.ngrok-free.dev/tasks/${id}/finished`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
